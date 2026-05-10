@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   BookOpen,
   BookOpenText,
@@ -25,7 +25,14 @@ const nav = [
 
 export function PrepShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, signOutUser } = useAuth();
+
+  async function handleSignOut() {
+    await signOutUser();
+    router.replace("/");
+    router.refresh();
+  }
 
   return (
     <AuthGate>
@@ -87,7 +94,7 @@ export function PrepShell({ children }: { children: React.ReactNode }) {
               </Link>
               <button
                 type="button"
-                onClick={() => void signOutUser()}
+                onClick={() => void handleSignOut()}
                 title="Sign out"
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-[#A0AEC0] transition-colors hover:border-purple-400/40 hover:text-white"
               >

@@ -158,8 +158,9 @@ export function useNotes() {
 
   const upsert = useCallback(
     async (note: Omit<Note, "id"> & { id?: string }) => {
-      if (!uid) return;
+      if (!uid) return null;
       const id = note.id ?? crypto.randomUUID();
+      const updatedAt = note.updatedAt || Date.now();
       const links = Array.isArray(note.syllabusLinks)
         ? dedupeSyllabusLinks(note.syllabusLinks)
         : getNoteSyllabusLinks(note as Note);
@@ -168,7 +169,7 @@ export function useNotes() {
         id,
         title: note.title,
         body: note.body,
-        updatedAt: Date.now(),
+        updatedAt,
         syllabusLinks: links,
         noteKind: note.noteKind,
         ncertStandard: note.ncertStandard,
@@ -211,10 +212,11 @@ export function useNotes() {
           setError(e instanceof Error ? e.message : "Could not save note");
           throw e;
         }
-        return;
+        return next;
       }
 
       setNotes((list) => [next, ...list.filter((n) => n.id !== id)]);
+      return next;
     },
     [uid],
   );

@@ -316,17 +316,21 @@ export default function NotesPage() {
 
     const b = body.trim() ? body : EMPTY_EDITOR_BODY;
     const t = titleText || "Untitled";
+    const savedAt = Date.now();
     const stageText =
       studyStage === "revision" ? `revision ${revisionNumber}` : "first read";
-    const completedSyllabusTopicIds = window.confirm(
-      `Mark the selected GS topic${cleaned.length > 1 ? "s" : ""} as finished for ${stageText}?`,
-    )
-      ? cleaned.map((link) => link.subtopicId)
-      : [];
+    const completedSyllabusTopicIds =
+      noteKind === "ncert"
+        ? []
+        : window.confirm(
+            `Mark the selected GS topic${cleaned.length > 1 ? "s" : ""} as finished for ${stageText}?`,
+          )
+        ? cleaned.map((link) => link.subtopicId)
+        : [];
     const completedNcertBookIds =
       noteKind === "ncert" && ncertSubjectId
         ? window.confirm(
-            `Mark the selected NCERT book as finished for ${stageText}?`,
+            `Mark the selected NCERT topic as finished for ${stageText}?`,
           )
           ? [ncertSubjectId]
           : []
@@ -336,7 +340,7 @@ export default function NotesPage() {
       id: noteId,
       title: t,
       body: b,
-      updatedAt: Date.now(),
+      updatedAt: savedAt,
       syllabusLinks: cleaned,
       noteKind,
       ncertStandard: noteKind === "ncert" ? ncertStandard : undefined,
@@ -356,11 +360,11 @@ export default function NotesPage() {
       completedNcertBookIds,
     };
 
-    await upsert(savedNote);
+    const persisted = await upsert(savedNote);
     await createNoteAlerts({
       id: noteId,
       title: t,
-      updatedAt: Date.now(),
+      updatedAt: persisted?.updatedAt ?? savedAt,
     });
     if (!activeId) setActiveId(noteId);
     dirtyRef.current = false;
