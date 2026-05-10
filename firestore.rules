@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owns(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, create, update, delete: if owns(uid);
+
+      match /profile/{document=**} {
+        allow read, create, update, delete: if owns(uid);
+      }
+
+      match /notes/{noteId} {
+        allow read, create, update, delete: if owns(uid);
+      }
+
+      match /syllabusPapers/{paperId} {
+        allow read, create, update, delete: if owns(uid);
+      }
+
+      match /studySessions/{sessionId} {
+        allow read, create, update, delete: if owns(uid);
+      }
+    }
+  }
+}
