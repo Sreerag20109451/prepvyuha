@@ -14,10 +14,10 @@ import {
 import type { RevisionTopic } from "@/types/prep";
 
 const AUTO_ALERTS = [
-  { label: "24h", days: 1 },
-  { label: "7d", days: 7 },
-  { label: "1m", days: 30 },
-  { label: "1y", days: 365 },
+  { label: "24 hr", days: 1 },
+  { label: "7 day", days: 7 },
+  { label: "Monthly", days: 30 },
+  { label: "Yearly", days: 365 },
 ];
 
 export function useRevision() {
@@ -119,13 +119,14 @@ export function useRevision() {
 
   const createNoteAlerts = useCallback(
     async (note: { id: string; title: string; updatedAt: number }) => {
+      const baseTime = note.updatedAt || Date.now();
       const existing = topics.filter((t) => t.noteId !== note.id);
       const alerts: RevisionTopic[] = AUTO_ALERTS.map((alert) => ({
         id: `${note.id}-${alert.label}`,
         title: `${note.title || "Untitled note"} · ${alert.label}`,
-        lastReviewedAt: null,
+        lastReviewedAt: baseTime,
         intervalDays: alert.days,
-        dueAt: note.updatedAt + alert.days * 86400000,
+        dueAt: baseTime + alert.days * 86400000,
         noteId: note.id,
         source: "note",
         cadenceLabel: alert.label,
